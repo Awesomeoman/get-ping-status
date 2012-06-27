@@ -1,0 +1,1 @@
+# get-ping-status## SYNOPSISPing workstations and report results in Excel## PARAMETERNo parameters required## DESCRIPTIONLoops through array of computers and tests network connectivity via WMI ping. Results are created in a new Excel worksheet in real time.
