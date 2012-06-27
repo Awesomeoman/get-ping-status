@@ -5,7 +5,7 @@ Ping workstations and report results in a csv.
 .PARAMETER
 -targets The file to be used which lists hosts to ping.
 File should be in text format with single FQDN server name on each line
--outputDest Specify a destination folder where the report will be saved if you want to use $FileName for your output
+-outputDest Specify a destination folder where the report will be saved
 Do not include a trailing slash
 
 .DESCRIPTION
