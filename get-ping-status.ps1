@@ -1,13 +1,28 @@
 <#
 .SYNOPSIS
-Ping workstations and report results in Excel
+Ping workstations and report results in Excel.
 
 .PARAMETER
-No parameters required
+-targets The file to be used which lists hosts to ping.
+File should be in text format with single FQDN server name on each line
+-outputDest Specify a destination folder where the report will be saved
+Do not include a trailing slash
 
 .DESCRIPTION
 Loops through array of computers and tests network connectivity via WMI ping. Results are created in a new Excel worksheet in real time.
+
+.EXAMPLE
+.\get-ping-status.ps1 -targets "D:\CN\target_servers.txt" -outputDest "D:\CN\Output"
+.\get-ping-status.ps1 "D:\JB\target_servers.txt" "D:\JB\Output"
 #>
+
+[CmdletBinding()]
+param (
+	[Parameter(Mandatory=$true)]
+	[string]$TargetFile,
+	[Parameter(Mandatory=$true)]
+	[string]$OutputFolder
+)
 
 $erroractionpreference = "SilentlyContinue"
 
@@ -17,9 +32,10 @@ $ExcelObject.visible = $True
 $ExcelWorkbook = $ExcelObject.Workbooks.Add()
 $ExcelWorksheet = $ExcelWorkbook.Worksheets.Item(1)
 # This will be the name of the Excel sheet. Goes down to seconds to stop multiple instances of script from replacing old reports
-$Filename = "d:\cn\PingList\PingList{0:ddMMyyy-HHmmss}.xls" -f (get-date)
+$Filename = "$OutputFolder\Ping_Results_{0:yyyyMMdd-HHmmss}.xls" -f (get-date)
 
-$InputFile = get-content D:\CN\Scripts\servers.txt
+# Import the target servers for passed text file
+$InputFile = get-content $TargetFile
 
 # Create column headings and format them nicely
 $ExcelWorksheet.Cells.Item(1,1) = "Machine Name"
@@ -56,22 +72,19 @@ foreach ($strComputer in $colComputers)
 		$ExcelWorksheet.Cells.Item($intRow, 2) = "Offline"
 		$ExcelWorksheet.cells.item($introw, 3) = 'DNS Lookup Failed'
 		$ExcelWorksheet.cells.item($introw, 3).interior.ColorIndex = 3
-
 	}
 
 	# If the statuscode is 0, ping has succeeded
-	if ($ping.statuscode –eq 0)
+	if ($ping.statuscode -eq 0)
 	{
 		$ExcelWorksheet.Cells.Item($intRow, 2) = "Online"
 		$ExcelWorksheet.cells.item($intRow, 3) = "Request Successful"
 		$ExcelWorksheet.cells.item($introw, 4) = $Ping.ProtocolAddress
 		$ExcelWorksheet.cells.item($introw, 3).interior.ColorIndex = 4
-
 		# Otherwise the ping has failed but why?
 	}
 	else
 	{
-		
 		$ExcelWorksheet.Cells.Item($intRow, 2) = "Offline"
 
 		# This code means it has timed out
@@ -91,7 +104,6 @@ foreach ($strComputer in $colComputers)
 		$ExcelWorksheet.cells.item($introw, 4) = $Ping.ProtocolAddress
 		# $ExcelHeadings.EntireColumn.AutoFit()
 	}
-	#$Reply = ""
 
 	#Move to the next row in worksheet
 	$intRow = $intRow + 1
